@@ -40,7 +40,7 @@ spec:
         - containerPort: 50051
           protocol: TCP
         env:
-         name: COTE_LOG
+        - name: COTE_LOG
           value: false
         - name: DOMAIN
           value: {{ $.Values.domain }}.{{ $.Values.environment }}
