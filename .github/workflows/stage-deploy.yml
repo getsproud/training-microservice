@@ -1,12 +1,8 @@
 name: Stage Deployment
 
 on:
-  push:
-    branches:
-    - main
-    paths-ignore:
-    - '*.md'
-    - LICENSE
+  release:
+    types: [prereleased]
 
 env:
   IMAGE: training

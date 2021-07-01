@@ -1,6 +1,8 @@
 name: Production Deployment
 
-on: workflow_dispatch
+on:
+  release:
+    types: [released]
 
 env:
   IMAGE: training
