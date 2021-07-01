@@ -41,7 +41,7 @@ spec:
           protocol: TCP
         env:
         - name: COTE_LOG
-          value: false
+          value: "false"
         - name: DOMAIN
           value: {{ $.Values.domain }}.{{ $.Values.environment }}
         - name: NODE_ENV
