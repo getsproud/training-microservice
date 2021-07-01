@@ -35,9 +35,12 @@ const init = () => {
   responder.on('getRecommended', getRecommended)
 
   // eslint-disable-next-line
-  console.log(`🤩 Training Microservice bound to port ${PORT}`)
+  console.log(`🤩 Training Service bound to port ${PORT}`)
 
   return { mongoose, responder }
 }
+
+if (process.env.NODE_ENV !== 'test')
+  init()
 
 module.exports = init
