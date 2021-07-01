@@ -24,7 +24,8 @@ jobs:
 
     - uses: codecov/codecov-action@v1
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{ secrets.CODECOV_TOKEN }}#
+        override_branch: main
 
   get-tag:
     runs-on: ubuntu-latest
