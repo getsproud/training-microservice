@@ -38,7 +38,7 @@ it('doesnt find a training', async () => {
       company: getObjectId('company-99').toString()
     }
   })).rejects.toMatchObject({
-    code: 404,
+    code: 200,
     i18n: 'TRAINING_NOT_FOUND'
   })
 })
