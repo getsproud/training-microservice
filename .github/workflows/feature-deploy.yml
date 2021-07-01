@@ -38,7 +38,7 @@ jobs:
         echo ::set-output name=TAG::$(echo ${{ github.ref }} | cut -c 12- | cut -d '-' -f 1 | sed s/\\//-/g)
 
   build-image:
-    needs: [get-tag]
+    needs: [get-tag,  run-tests]
     runs-on: ubuntu-latest
 
     steps:
@@ -85,7 +85,7 @@ jobs:
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   deploy-to-cluster:
-    needs: [build-image, get-tag, run-tests]
+    needs: [build-image, get-tag]
     runs-on: ubuntu-latest
 
     steps:

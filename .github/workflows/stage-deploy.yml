@@ -39,7 +39,7 @@ jobs:
         head_ref: ${{ github.head_ref }}
 
   build-image:
-    needs: [get-tag]
+    needs: [get-tag, run-tests]
     runs-on: ubuntu-latest
 
     steps:
@@ -86,7 +86,7 @@ jobs:
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   deploy-to-cluster:
-    needs: [build-image, get-tag, run-tests]
+    needs: [build-image, get-tag]
     runs-on: ubuntu-latest
 
     steps:
