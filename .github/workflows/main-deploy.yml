@@ -4,9 +4,29 @@ on: workflow_dispatch
 
 env:
   IMAGE: training
+  CLUSTER_ENV: production
 
 jobs:
-  build-and-deploy:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Jest
+      run: npm run test  -- --coverage --silent
+
+  get-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      TAG: ${{ steps.get-ref.outputs.tag }}
+    steps:
+    - name: Get the Ref
+      id: get-ref
+      uses: ankitvgupta/ref-to-tag-action@master
+      with:
+        ref: ${{ github.ref }}
+        head_ref: ${{ github.head_ref }}
+
+  build-image:
+    needs: [get-tag]
     runs-on: ubuntu-latest
 
     steps:
@@ -22,11 +42,11 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        key: ${{ runner.os }}-buildx-${{ needs.get-tag.outputs.TAG }}
         restore-keys: |
           ${{ runner.os }}-buildx-
 
-    - name: Login to Docker Registry
+    - name: Login to Github Container Registry
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
@@ -41,21 +61,41 @@ jobs:
         file: ./Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         push: true
-        tags: ghcr.io/getsproud/${{ env.IMAGE }}:${{ github.sha }}, ghcr.io/getsproud/${{ env.IMAGE }}:latest
+        tags: ghcr.io/getsproud/${{ env.IMAGE }}:${{ needs.get-tag.outputs.TAG }}, ghcr.io/getsproud/${{ env.IMAGE }}:latest
         target: production
         cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache
+        cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+        build-args: NODE_ENV="stage"
+
+    - name: Move cache
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  deploy-to-cluster:
+    needs: [build-image, get-tag]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses:  actions/checkout@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Deploy to Cluster
-      uses: steebchen/kubectl@master
       env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA_PROD }}
-        KUBECTL_VERSION: "1.20"
-      with:
-        args: |
-          set image --record deployment/${{ env.IMAGE }}-app \
-          ${{ env.IMAGE }}-service=ghcr.io/getsproud/${{ env.IMAGE }}:latest \
-          -n sproud
+        KUBECONFIG: ${{ secrets.KUBE_CONFIG_DATA_STAGE }}
+      run: |
+        mkdir -p /tmp/.kube
+        touch /tmp/.kube/config
+        echo "${{ env.KUBECONFIG }}" | base64 --decode >> /tmp/.kube/config
+
+        # install/upgrade helm chart
+        KUBECONFIG=/tmp/.kube/config helm upgrade --install ${{ env.IMAGE }} ./deploy/helm/${{ env.IMAGE }} \
+        --values ./deploy/helm/${{ env.IMAGE }}/env.values.${{ env.CLUSTER_ENV }}.yaml \
+        --set service.tag=latest \
+        --set nodeEnv=production \
+        --namespace sproud \
+        --create-namespace
 
     - name: Get Message
       id: log

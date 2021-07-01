@@ -23,7 +23,7 @@ const updateCategories = call => new Promise((resolve, reject) => {
     if (!remove)
       t.categories.push(...categories)
     else
-      t.categories = t.categories.filter(c => categories.indexOf(c) === -1)
+      t.categories = t.categories.filter(c => categories.indexOf(c.toString()) === -1)
 
     return t.save(() => {
       message.i18n = 'TRAINING_UPDATE_SUCCESS'

@@ -13,9 +13,10 @@ const findAllBy = call => new Promise((resolve, reject) => {
   }
 
   const opts = {
-    page: options.page || 1,
-    limit: options.limit || 12,
-    pagination: options.pagination || true
+    page: 1,
+    limit: 12,
+    pagination: true,
+    ...options
   }
 
   Training.paginate(query, opts).then(trainings => {

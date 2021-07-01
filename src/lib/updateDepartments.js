@@ -23,7 +23,7 @@ const updateDepartments = call => new Promise((resolve, reject) => {
     if (!remove)
       t.departments.push(...departments)
     else
-      t.departments = t.departments.filter(d => departments.indexOf(d) === -1)
+      t.departments = t.departments.filter(d => departments.indexOf(d.toString()) === -1)
 
     return t.save(() => {
       message.i18n = 'TRAINING_UPDATE_SUCCESS'

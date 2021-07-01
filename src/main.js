@@ -1,5 +1,5 @@
 import { Responder } from 'cote'
-import { connect } from 'mongoose'
+import mongoose from 'mongoose'
 
 import findBy from './lib/findBy'
 import findAllBy from './lib/findAllBy'
@@ -13,27 +13,13 @@ import getRecommended from './lib/getRecommended'
 
 const PORT = 50051
 
-const connectRetry = t => {
-  let tries = t
-
-  return connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@sproud-cluster${process.env.NODE_ENV !== 'production' ? '-dev' : ''}${process.env.MONGO_HOST}/sproud${process.env.NODE_ENV === 'development' ? '-dev' : ''}?retryWrites=true&w=majority`, {
+const init = () => {
+  mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@sproud-cluster${process.env.NODE_ENV !== 'production' ? '-dev' : ''}${process.env.MONGO_HOST}/sproud${process.env.NODE_ENV !== 'production' ? '-dev' : ''}?retryWrites=true&w=majority`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false
   })
-    .catch(e => {
-      if (tries < 5) {
-        tries += 1
-        setTimeout(() => connectRetry(tries), 5000)
-      }
 
-      throw new Error(e)
-    })
-}
-
-connectRetry(0)
-
-try {
   const responder = new Responder({
     name: 'Training Service', port: PORT, key: 'training'
   })
@@ -53,7 +39,15 @@ try {
 
   // eslint-disable-next-line
   console.log(`🤩 Training Microservice bound to port ${PORT}`)
-} catch (e) {
-  // eslint-disable-next-line
-  console.error(`${e.message}`)
+
+  process.on('exit', () => {
+    // eslint-disable-next-line
+    console.log(`🤩 Shutting down Training Microservice`)
+    responder.close()
+    mongoose.connection.close()
+  })
+
+  return { mongoose, responder }
 }
+
+module.exports = init

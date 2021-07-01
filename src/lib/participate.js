@@ -20,7 +20,7 @@ const participate = call => new Promise((resolve, reject) => {
       return reject(message)
     }
 
-    if (t.participants.indexOf(employee) !== -1) {
+    if (!remove && t.participants.indexOf(employee) !== -1) {
       message.i18n = 'TRAINING_ALREADY_PARTICIPATING'
       message.data = t
       message.code = 400
@@ -28,8 +28,9 @@ const participate = call => new Promise((resolve, reject) => {
       return reject(message)
     }
 
-    if (!remove && (!t.spots || t.participants.length < t.spots)) {
+    if (!remove && (Number.isInteger(t.spots) && t.spots > t.participants.length)) {
       t.participants.push(employee)
+
       return t.save(() => {
         message.i18n = 'TRAINING_PARTICIPATE_SUCCESS'
         message.data = t
@@ -40,7 +41,8 @@ const participate = call => new Promise((resolve, reject) => {
     }
 
     if (remove) {
-      t.participants = t.participants.filter(p => p !== employee)
+      t.participants = t.participants.filter(p => p.toString() !== employee)
+
       return t.save(() => {
         message.i18n = 'TRAINING_UNPARTICIPATE_SUCCESS'
         message.data = t
@@ -52,6 +54,7 @@ const participate = call => new Promise((resolve, reject) => {
 
     message.data = t
     message.error = 'TRAINING_SPOTS_FULL'
+    message.i18n = message.error
     message.code = 403
 
     return reject(message)

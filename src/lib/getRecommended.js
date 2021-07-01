@@ -16,9 +16,10 @@ const getRecommended = call => new Promise((resolve, reject) => {
   query.fromDate = !query.fromDate ? { $gte: new Date() } : query.fromDate
 
   const opts = {
-    page: options.page || 1,
-    limit: options.limit || 12,
-    pagination: options.pagination || true
+    page: 1,
+    limit: 12,
+    pagination: true,
+    ...options
   }
 
   Recommendations.find({ categories: query.categories }).then(recommended => {

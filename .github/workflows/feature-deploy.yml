@@ -1,9 +1,9 @@
-name: Stage Deployment
+name: Feature Deployment
 
 on:
   push:
     branches:
-    - main
+    - 'feature/*'
     paths-ignore:
     - '*.md'
     - LICENSE
@@ -17,19 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Jest
-      run: npm run test  -- --coverage --silent || exit 0
+      run: npm run test  -- --coverage --silent
 
   get-tag:
     runs-on: ubuntu-latest
     outputs:
-      TAG: ${{ steps.get-ref.outputs.tag }}
+      TAG: ${{ steps.get-ref.outputs.TAG }}
     steps:
-    - name: Get the Ref
+    - name: Get the Tag
       id: get-ref
-      uses: ankitvgupta/ref-to-tag-action@master
-      with:
-        ref: ${{ github.ref }}
-        head_ref: ${{ github.head_ref }}
+      run: |
+        echo $(echo ${{ github.ref }} | cut -c 12- | cut -d '-' -f 1 | sed s/\\//-/g)
+        echo ::set-output name=TAG::$(echo ${{ github.ref }} | cut -c 12- | cut -d '-' -f 1 | sed s/\\//-/g)
 
   build-image:
     needs: [get-tag]
@@ -68,10 +67,10 @@ jobs:
         builder: ${{ steps.buildx.outputs.name }}
         push: true
         tags: ghcr.io/getsproud/${{ env.IMAGE }}:${{ needs.get-tag.outputs.TAG }}
-        target: production
+        target: develop
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-        build-args: NODE_ENV="stage"
+        build-args: NODE_ENV="development"
 
     - name: Move cache
       run: |
@@ -99,6 +98,6 @@ jobs:
         KUBECONFIG=/tmp/.kube/config helm upgrade --install ${{ env.IMAGE }} ./deploy/helm/${{ env.IMAGE }} \
         --values ./deploy/helm/${{ env.IMAGE }}/env.values.${{ env.CLUSTER_ENV }}.yaml \
         --set service.tag=${{ needs.get-tag.outputs.TAG }} \
-        --set nodeEnv=production \
-        --namespace sproud-stage \
+        --set nodeEnv=${{ env.CLUSTER_ENV }} \
+        --namespace sproud-${{ needs.get-tag.outputs.TAG }} \
         --create-namespace
