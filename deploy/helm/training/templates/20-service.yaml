@@ -3,11 +3,6 @@ kind: Service
 metadata:
   labels:
     app: {{ $.Values.service.image | quote  }}
-    {{- if ne $.Values.environment "io" }}
-    feature: {{ $.Values.service.tag | quote }}
-    {{- else }}
-    tag: {{ $.Values.service.tag| quote  }}
-    {{- end }}
   name: {{ $.Values.service.image }}-service
 spec:
   ports:
@@ -15,9 +10,4 @@ spec:
     port: 50051
   selector:
     app: {{ $.Values.service.image }}
-    {{- if ne $.Values.environment "io" }}s
-    feature: {{ $.Values.service.tag | quote }}
-    {{- else }}
-    tag: {{ $.Values.service.tag | quote }}
-    {{- end }}
 ---
