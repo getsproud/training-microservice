@@ -34,18 +34,8 @@ const init = () => {
   responder.on('updateCategories', updateCategories)
   responder.on('getRecommended', getRecommended)
 
-  responder.on('liveness', () => new Promise(resolve => resolve(200)))
-  responder.on('readiness', () => new Promise(resolve => resolve(200)))
-
   // eslint-disable-next-line
   console.log(`🤩 Training Microservice bound to port ${PORT}`)
-
-  process.on('exit', () => {
-    // eslint-disable-next-line
-    console.log(`🤩 Shutting down Training Microservice`)
-    responder.close()
-    mongoose.connection.close()
-  })
 
   return { mongoose, responder }
 }

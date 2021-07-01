@@ -30,218 +30,379 @@ afterAll(async () => {
   await requester.close()
 })
 
-it('doesnt find a training', async () => {
-  await expect(requester.send({
-    type: 'findBy',
-    query: {
-      title: 'JSConf Europe 20255',
-      company: getObjectId('company-99').toString()
-    }
-  })).rejects.toMatchObject({
-    code: 200,
-    i18n: 'TRAINING_NOT_FOUND'
+describe('findBy', () => {
+  it('fails [no training]', async () => {
+    await expect(requester.send({
+      type: 'findBy',
+      query: {
+        title: 'JSConf Europe 20255',
+        company: getObjectId('company-99').toString()
+      }
+    })).rejects.toMatchObject({
+      code: 404,
+      i18n: 'TRAINING_NOT_FOUND'
+    })
+  })
+
+  it('succeeds', async () => {
+    const training = await requester.send({
+      type: 'findBy',
+      query: {
+        title: 'JSConf Europe 2021',
+        company: getObjectId('company-1').toString()
+      }
+    })
+
+    expect(training).toBeDefined()
+    expect(training.data).toBeDefined()
+    expect(training.code).toBe(200)
+    expect(training.error).toBeFalsy()
+    expect(training.stack).toBeFalsy()
   })
 })
 
-it('get one training of one company', async () => {
-  const training = await requester.send({
-    type: 'findBy',
-    query: {
-      title: 'JSConf Europe 2021',
-      company: getObjectId('company-1').toString()
-    }
+describe('findAllBy', () => {
+  it('fails [no training]', async () => {
+    await expect(requester.send({
+      type: 'findAllBy',
+      query: {
+        company: getObjectId('company-99').toString()
+      }
+    })).rejects.toMatchObject({
+      code: 404,
+      i18n: 'TRAININGS_NOT_FOUND'
+    })
   })
 
-  expect(training).toBeDefined()
-  expect(training.data).toBeDefined()
-  expect(training.code).toBe(200)
-  expect(training.error).toBeFalsy()
-  expect(training.stack).toBeFalsy()
-})
+  it('succeeds', async () => {
+    const trainings = await requester.send({
+      type: 'findAllBy',
+      query: {
+        company: getObjectId('company-1').toString()
+      }
+    })
 
-it('get all trainings of one company', async () => {
-  const trainings = await requester.send({
-    type: 'findAllBy',
-    query: {
-      company: getObjectId('company-1').toString()
-    }
-  })
-
-  expect(trainings).toBeDefined()
-  expect(trainings.data).toBeDefined()
-  expect(trainings.code).toBe(200)
-  expect(trainings.error).toBeFalsy()
-  expect(trainings.stack).toBeFalsy()
-  expect(trainings.data.docs.length).toBe(3)
-})
-
-it('get all recommended trainings for one category', async () => {
-  const trainings = await requester.send({
-    type: 'getRecommended',
-    query: {
-      categories: getObjectId('cat-developemnt').toString()
-    }
-  })
-
-  expect(trainings).toBeDefined()
-  expect(trainings.data).toBeDefined()
-  expect(trainings.code).toBe(200)
-  expect(trainings.error).toBeFalsy()
-  expect(trainings.stack).toBeFalsy()
-  expect(trainings.data.docs.length).toBe(3)
-})
-
-it('create training for one company', async () => {
-  const training = await requester.send({
-    type: 'createTraining',
-    query: {
-      _id: getObjectId('training-9999').toString(),
-      author: getObjectId('employee-1').toString(),
-      company: getObjectId('company-1').toString(),
-      title: 'test-training',
-      spots: 0
-    }
-  })
-
-  expect(training).toBeDefined()
-  expect(training.data).toBeDefined()
-  expect(training.code).toBe(200)
-  expect(training.error).toBeFalsy()
-  expect(training.stack).toBeFalsy()
-  expect(training.data.author).toBe(getObjectId('employee-1').toString())
-  expect(training.data.company).toBe(getObjectId('company-1').toString())
-  expect(training.data.title).toBe('test-training')
-})
-
-it('participate at training which is full', async () => {
-  await expect(requester.send({
-    type: 'participate',
-    query: {
-      employee: getObjectId('employee-999').toString(),
-      training: getObjectId('training-9999').toString(),
-      remove: false
-    }
-  })).rejects.toMatchObject({
-    code: 403,
-    i18n: 'TRAINING_SPOTS_FULL'
+    expect(trainings).toBeDefined()
+    expect(trainings.data).toBeDefined()
+    expect(trainings.code).toBe(200)
+    expect(trainings.error).toBeFalsy()
+    expect(trainings.stack).toBeFalsy()
+    expect(trainings.data.docs.length).toBe(3)
   })
 })
 
-it('update training for one company', async () => {
-  const training = await requester.send({
-    type: 'updateTraining',
-    query: {
-      _id: getObjectId('training-9999').toString(),
-      title: 'test-training-updated',
-      spots: 1
-    }
+describe('getRecommended', () => {
+  it('fails [no training]', async () => {
+    await expect(requester.send({
+      type: 'getRecommended',
+      query: {
+        categories: getObjectId('cat-not-found').toString()
+      }
+    })).rejects.toMatchObject({
+      code: 404,
+      i18n: 'TRAININGS_NOT_FOUND'
+    })
   })
 
-  expect(training).toBeDefined()
-  expect(training.data).toBeDefined()
-  expect(training.code).toBe(200)
-  expect(training.error).toBeFalsy()
-  expect(training.stack).toBeFalsy()
-  expect(training.data.author).toBe(getObjectId('employee-1').toString())
-  expect(training.data.company).toBe(getObjectId('company-1').toString())
-  expect(training.data.title).toBe('test-training-updated')
+  it('succeeds [default options]', async () => {
+    const trainings = await requester.send({
+      type: 'getRecommended',
+      query: {
+        categories: getObjectId('cat-developemnt').toString()
+      }
+    })
+
+    expect(trainings).toBeDefined()
+    expect(trainings.data).toBeDefined()
+    expect(trainings.code).toBe(200)
+    expect(trainings.error).toBeFalsy()
+    expect(trainings.stack).toBeFalsy()
+    expect(trainings.data.docs.length).toBe(3)
+  })
+
+  it('succeeds [custom options]', async () => {
+    const trainings = await requester.send({
+      type: 'getRecommended',
+      query: {
+        categories: getObjectId('cat-developemnt').toString()
+      },
+      options: {
+        page: 2,
+        limit: 1
+      }
+    })
+
+    expect(trainings).toBeDefined()
+    expect(trainings.data).toBeDefined()
+    expect(trainings.code).toBe(200)
+    expect(trainings.error).toBeFalsy()
+    expect(trainings.stack).toBeFalsy()
+    expect(trainings.data.docs.length).toBe(1)
+  })
+
+  it('succeeds [without pagination]', async () => {
+    const trainings = await requester.send({
+      type: 'getRecommended',
+      query: {
+        categories: getObjectId('cat-developemnt').toString()
+      },
+      options: {
+        pagination: false
+      }
+    })
+
+    expect(trainings).toBeDefined()
+    expect(trainings.data).toBeDefined()
+    expect(trainings.code).toBe(200)
+    expect(trainings.error).toBeFalsy()
+    expect(trainings.stack).toBeFalsy()
+    expect(trainings.data.docs.length).toBe(3)
+  })
 })
 
-it('participate at training', async () => {
-  const training = await requester.send({
-    type: 'participate',
-    query: {
-      employee: getObjectId('employee-999').toString(),
-      training: getObjectId('training-9999').toString(),
-      remove: false
-    }
+describe('createTraining', () => {
+  it('fails [missing fields]', async () => {
+    await expect(requester.send({
+      type: 'createTraining',
+      query: {}
+    })).rejects.toMatchObject({
+      code: 500,
+      i18n: 'TRAINING_CREATION_FAILURE'
+    })
   })
 
-  expect(training).toBeDefined()
-  expect(training.code).toBe(200)
-  expect(training.error).toBeFalsy()
-  expect(training.stack).toBeFalsy()
-  expect(training.i18n).toBe('TRAINING_PARTICIPATE_SUCCESS')
+  it('succeeds', async () => {
+    const training = await requester.send({
+      type: 'createTraining',
+      query: {
+        _id: getObjectId('training-9999').toString(),
+        author: getObjectId('employee-1').toString(),
+        company: getObjectId('company-1').toString(),
+        title: 'test-training',
+        spots: 0
+      }
+    })
+
+    expect(training).toBeDefined()
+    expect(training.data).toBeDefined()
+    expect(training.code).toBe(200)
+    expect(training.error).toBeFalsy()
+    expect(training.stack).toBeFalsy()
+    expect(training.data.author).toBe(getObjectId('employee-1').toString())
+    expect(training.data.company).toBe(getObjectId('company-1').toString())
+    expect(training.data.title).toBe('test-training')
+  })
 })
 
-it('check participation on training', async () => {
-  await expect(requester.send({
-    type: 'participate',
-    query: {
-      employee: getObjectId('employee-999').toString(),
-      training: getObjectId('training-9999').toString(),
-      remove: false
-    }
-  })).rejects.toMatchObject({
-    code: 400,
-    i18n: 'TRAINING_ALREADY_PARTICIPATING'
+describe('participate 1/2', () => {
+  it('fails [no spots]', async () => {
+    await expect(requester.send({
+      type: 'participate',
+      query: {
+        employee: getObjectId('employee-999').toString(),
+        training: getObjectId('training-9999').toString(),
+        remove: false
+      }
+    })).rejects.toMatchObject({
+      code: 403,
+      i18n: 'TRAINING_SPOTS_FULL'
+    })
+  })
+
+  it('fails [no training]', async () => {
+    await expect(requester.send({
+      type: 'participate',
+      query: {
+        employee: getObjectId('employee-999').toString(),
+        training: getObjectId('training-999999').toString(),
+        remove: false
+      }
+    })).rejects.toMatchObject({
+      code: 404,
+      i18n: 'TRAINING_NOT_FOUND'
+    })
   })
 })
 
-it('unparticipate from training', async () => {
-  const training = await requester.send({
-    type: 'participate',
-    query: {
-      employee: getObjectId('employee-999').toString(),
-      training: getObjectId('training-9999').toString(),
-      remove: true
-    }
+describe('updateTraining', () => {
+  it('fails [no training]', async () => {
+    await expect(requester.send({
+      type: 'updateTraining',
+      query: {
+        _id: getObjectId('training-999999').toString(),
+        title: 'test-training-updated',
+        spots: 1
+      }
+    })).rejects.toMatchObject({
+      code: 404,
+      i18n: 'TRAINING_NOT_FOUND'
+    })
   })
 
-  expect(training).toBeDefined()
-  expect(training.code).toBe(200)
-  expect(training.error).toBeFalsy()
-  expect(training.stack).toBeFalsy()
-  expect(training.i18n).toBe('TRAINING_UNPARTICIPATE_SUCCESS')
+  it('succeeds', async () => {
+    const training = await requester.send({
+      type: 'updateTraining',
+      query: {
+        _id: getObjectId('training-9999').toString(),
+        title: 'test-training-updated',
+        spots: 1
+      }
+    })
+
+    expect(training).toBeDefined()
+    expect(training.data).toBeDefined()
+    expect(training.code).toBe(200)
+    expect(training.error).toBeFalsy()
+    expect(training.stack).toBeFalsy()
+    expect(training.data.author).toBe(getObjectId('employee-1').toString())
+    expect(training.data.company).toBe(getObjectId('company-1').toString())
+    expect(training.data.title).toBe('test-training-updated')
+  })
 })
 
-it('update departments for training of one company', async () => {
-  const training = await requester.send({
-    type: 'updateDepartments',
-    query: {
-      training: getObjectId('training-9999').toString(),
-      departments: [getObjectId('dep-dev').toString(), getObjectId('dep-mark').toString()]
-    }
+describe('participate 2/2', () => {
+  it('succeeds', async () => {
+    const training = await requester.send({
+      type: 'participate',
+      query: {
+        employee: getObjectId('employee-999').toString(),
+        training: getObjectId('training-9999').toString(),
+        remove: false
+      }
+    })
+
+    expect(training).toBeDefined()
+    expect(training.code).toBe(200)
+    expect(training.error).toBeFalsy()
+    expect(training.stack).toBeFalsy()
+    expect(training.i18n).toBe('TRAINING_PARTICIPATE_SUCCESS')
   })
 
-  expect(training).toBeDefined()
-  expect(training.data).toBeDefined()
-  expect(training.code).toBe(200)
-  expect(training.error).toBeFalsy()
-  expect(training.stack).toBeFalsy()
-  expect(training.data.departments).toStrictEqual([getObjectId('dep-dev').toString(), getObjectId('dep-mark').toString()])
+  it('fails [already participating]', async () => {
+    await expect(requester.send({
+      type: 'participate',
+      query: {
+        employee: getObjectId('employee-999').toString(),
+        training: getObjectId('training-9999').toString(),
+        remove: false
+      }
+    })).rejects.toMatchObject({
+      code: 400,
+      i18n: 'TRAINING_ALREADY_PARTICIPATING'
+    })
+  })
+
+  it('unparticipate', async () => {
+    const training = await requester.send({
+      type: 'participate',
+      query: {
+        employee: getObjectId('employee-999').toString(),
+        training: getObjectId('training-9999').toString(),
+        remove: true
+      }
+    })
+
+    expect(training).toBeDefined()
+    expect(training.code).toBe(200)
+    expect(training.error).toBeFalsy()
+    expect(training.stack).toBeFalsy()
+    expect(training.i18n).toBe('TRAINING_UNPARTICIPATE_SUCCESS')
+  })
 })
 
-it('update categories for training of one company', async () => {
-  const training = await requester.send({
-    type: 'updateCategories',
-    query: {
-      training: getObjectId('training-9999').toString(),
-      categories: [getObjectId('cat-dev').toString(), getObjectId('cat-mark').toString()]
-    }
+describe('updateCategories', () => {
+  it('fails [no training]', async () => {
+    await expect(requester.send({
+      type: 'updateCategories',
+      query: {
+        training: getObjectId('training-999999').toString(),
+        categories: [getObjectId('cat-dev').toString(), getObjectId('cat-mark').toString()]
+      }
+    })).rejects.toMatchObject({
+      code: 404,
+      i18n: 'TRAINING_NOT_FOUND'
+    })
   })
 
-  expect(training).toBeDefined()
-  expect(training.data).toBeDefined()
-  expect(training.code).toBe(200)
-  expect(training.error).toBeFalsy()
-  expect(training.stack).toBeFalsy()
-  expect(training.data.categories).toStrictEqual([getObjectId('cat-dev').toString(), getObjectId('cat-mark').toString()])
+  it('succeeds', async () => {
+    const training = await requester.send({
+      type: 'updateCategories',
+      query: {
+        training: getObjectId('training-9999').toString(),
+        categories: [getObjectId('cat-dev').toString(), getObjectId('cat-mark').toString()]
+      }
+    })
+
+    expect(training).toBeDefined()
+    expect(training.data).toBeDefined()
+    expect(training.code).toBe(200)
+    expect(training.error).toBeFalsy()
+    expect(training.stack).toBeFalsy()
+    expect(training.data.categories).toStrictEqual([getObjectId('cat-dev').toString(), getObjectId('cat-mark').toString()])
+  })
 })
 
-it('delete training for one company', async () => {
-  const training = await requester.send({
-    type: 'deleteTraining',
-    query: {
-      author: getObjectId('employee-1').toString(),
-      company: getObjectId('company-1').toString(),
-      title: 'test-training-updated'
-    }
+describe('updateDepartments', () => {
+  it('fails [no training]', async () => {
+    await expect(requester.send({
+      type: 'updateDepartments',
+      query: {
+        training: getObjectId('training-999999').toString(),
+        departments: [getObjectId('dep-dev').toString(), getObjectId('dep-mark').toString()]
+      }
+    })).rejects.toMatchObject({
+      code: 404,
+      i18n: 'TRAINING_NOT_FOUND'
+    })
   })
 
-  expect(training).toBeDefined()
-  expect(training.code).toBe(204)
-  expect(training.error).toBeFalsy()
-  expect(training.stack).toBeFalsy()
-  expect(training.i18n).toBe('TRAINING_DELETION_SUCCESS')
+  it('succeeds', async () => {
+    const training = await requester.send({
+      type: 'updateDepartments',
+      query: {
+        training: getObjectId('training-9999').toString(),
+        departments: [getObjectId('dep-dev').toString(), getObjectId('dep-mark').toString()]
+      }
+    })
+
+    expect(training).toBeDefined()
+    expect(training.data).toBeDefined()
+    expect(training.code).toBe(200)
+    expect(training.error).toBeFalsy()
+    expect(training.stack).toBeFalsy()
+    expect(training.data.departments).toStrictEqual([getObjectId('dep-dev').toString(), getObjectId('dep-mark').toString()])
+  })
+})
+
+describe('deleteTraining', () => {
+  it('fails [no training]', async () => {
+    await expect(requester.send({
+      type: 'deleteTraining',
+      query: {
+        author: getObjectId('employee-1').toString(),
+        company: getObjectId('company-1').toString(),
+        title: 'test-training-updated-not-found'
+      }
+    })).rejects.toMatchObject({
+      code: 404,
+      i18n: 'TRAINING_NOT_FOUND'
+    })
+  })
+
+  it('succeeds', async () => {
+    const training = await requester.send({
+      type: 'deleteTraining',
+      query: {
+        author: getObjectId('employee-1').toString(),
+        company: getObjectId('company-1').toString(),
+        title: 'test-training-updated'
+      }
+    })
+
+    expect(training).toBeDefined()
+    expect(training.code).toBe(204)
+    expect(training.error).toBeFalsy()
+    expect(training.stack).toBeFalsy()
+    expect(training.i18n).toBe('TRAINING_DELETION_SUCCESS')
+  })
 })
