@@ -17,10 +17,14 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install dependencies
-      run: npm install
+      run: npm ci
 
     - name: Jest
       run: npm run test  -- --coverage --silent
+
+    - uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   get-tag:
     runs-on: ubuntu-latest
