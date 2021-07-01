@@ -1,5 +1,10 @@
 module.exports = {
-  extends: ['gitmoji'],
+  rules: {
+    'subject-empty': [2, 'never'],
+    'type-empty': [2, 'never'],
+    'scope-empty': [2, 'never'],
+
+  },
   parserPreset: {
     parserOpts: {
       headerPattern: /^(?::\w*:|(?:\ud83c[\udf00-\udfff])|(?:\ud83d[\udc00-\ude4f\ude80-\udeff])|[\u2600-\u2B55])\s(?<type>\w*)(?:\((?<scope>.*)\))?!?:\s(?<subject>(?:(?!#).)*(?:(?!\s).))\s?(?<ticket>#\d*)?$/,
