@@ -7,10 +7,24 @@ spec:
   selector:
     matchLabels:
       app: {{ $.Values.service.image | quote }}
+      {{- if and (ne $.Values.environment "io") (contains "rc-" $.Values.service.tag) }}
+      feature: stage
+      {{- else if ne $.Values.environment "io" }}
+      feature: {{ $.Values.service.tag | quote }}
+      {{- else }}
+      tag: {{ $.Values.service.tag | quote }}
+      {{- end }}
   template:
     metadata:
       labels:
         app: {{ $.Values.service.image | quote }}
+        {{- if and (ne $.Values.environment "io") (contains "rc-" $.Values.service.tag) }}
+        feature: stage
+        {{- else if ne $.Values.environment "io" }}
+        feature: {{ $.Values.service.tag | quote }}
+        {{- else }}
+        tag: {{ $.Values.service.tag | quote }}
+        {{- end }}
     spec:
       containers:
       - name: {{ $.Values.service.image }}-service
