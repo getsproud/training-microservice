@@ -1,7 +1,7 @@
 module.exports = {
   setupFiles: ['<rootDir>/.jest/setEnvVars.js'],
   preset: '@shelf/jest-mongodb',
-  silent: true,
+  silent: false,
   collectCoverage: true,
   coverageThreshold: {
     global: {
