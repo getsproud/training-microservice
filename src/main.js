@@ -14,7 +14,7 @@ import getRecommended from './lib/getRecommended'
 const PORT = 50051
 
 const init = () => {
-  mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@s${process.env.MONGO_HOST}/sproud${process.env.NODE_ENV !== 'production' ? '-dev' : ''}?retryWrites=true&w=majority`, {
+  mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}/${process.env.MONGO_COLLECTION}?retryWrites=true&w=majority`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false

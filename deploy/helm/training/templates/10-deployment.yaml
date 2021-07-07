@@ -63,6 +63,8 @@ spec:
               key: password
         - name: MONGO_USER
           value: {{ $.Values.mongo.user }}
+        - name: MONGO_COLLECTION
+          value: {{ $.Values.mongo.collection }}
         - name: MONGO_HOST
           value: {{ $.Values.mongo.host }}
       imagePullSecrets:
