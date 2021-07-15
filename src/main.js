@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 
 import findBy from './lib/findBy'
 import findAllBy from './lib/findAllBy'
+import search from './lib/search'
 import createTraining from './lib/createTraining'
 import deleteTraining from './lib/deleteTraining'
 import updateTraining from './lib/updateTraining'
@@ -25,6 +26,7 @@ const init = () => {
   })
 
   responder.on('findBy', findBy)
+  responder.on('search', search)
   responder.on('findAllBy', findAllBy)
   responder.on('createTraining', createTraining)
   responder.on('deleteTraining', deleteTraining)

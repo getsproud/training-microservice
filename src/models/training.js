@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
+import textSearch from 'mongoose-partial-full-search'
 
 const schema = new Schema({
   author: {
@@ -59,7 +60,9 @@ const schema = new Schema({
 
 schema.index({ title: 'text', description: 'text' })
 
+schema.plugin(textSearch)
 schema.plugin(mongoosePaginate)
+
 const Training = model('training', schema)
 
 export default Training
