@@ -9,7 +9,8 @@ const schema = new Schema({
   },
   title: {
     type: Schema.Types.String,
-    required: true
+    required: true,
+    index: true
   },
   prices: [{
     price: Schema.Types.Number,
@@ -23,7 +24,10 @@ const schema = new Schema({
   country: Schema.Types.String,
   fromDate: Schema.Types.Date,
   toDate: Schema.Types.Date,
-  description: Schema.Types.String,
+  description: {
+    type: Schema.Types.String,
+    index: true
+  },
   remote: {
     type: Schema.Types.Boolean,
     default: false
