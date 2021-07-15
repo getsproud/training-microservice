@@ -108,7 +108,7 @@ describe('getRecommended', () => {
     const trainings = await requester.send({
       type: 'getRecommended',
       query: {
-        categories: getObjectId('cat-developemnt').toString()
+        categories: getObjectId('cat-web').toString()
       }
     })
 
@@ -124,7 +124,7 @@ describe('getRecommended', () => {
     const trainings = await requester.send({
       type: 'getRecommended',
       query: {
-        categories: getObjectId('cat-developemnt').toString()
+        categories: getObjectId('cat-web').toString()
       },
       options: {
         page: 2,
@@ -144,7 +144,7 @@ describe('getRecommended', () => {
     const trainings = await requester.send({
       type: 'getRecommended',
       query: {
-        categories: getObjectId('cat-developemnt').toString()
+        categories: getObjectId('cat-web').toString()
       },
       options: {
         pagination: false

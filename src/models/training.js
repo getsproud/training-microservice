@@ -57,6 +57,8 @@ const schema = new Schema({
   }
 }, { timestamps: true })
 
+schema.index({ title: 'text', description: 'text' })
+
 schema.plugin(mongoosePaginate)
 const Training = model('training', schema)
 
