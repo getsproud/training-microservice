@@ -42,7 +42,14 @@ const schema = new Schema({
     match: /[(http(s)?)://(www.)?a-zA-Z0-9@:%._\-+~#=]{2,256}\.[a-z]{2,6}\b/
   },
   spots: { type: Schema.Types.Number },
-  participants: [Schema.Types.ObjectId],
+  participants: [{
+    participant: Schema.Types.ObjectId,
+    bookedAt: {
+      type: Schema.Types.Date,
+      default: new Date()
+    },
+    ticket: Schema.Types.String
+  }],
   categories: [{
     type: Schema.Types.ObjectId,
     index: true

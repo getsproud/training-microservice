@@ -1,7 +1,12 @@
 import Training from '../models/training'
 
 const participate = call => new Promise((resolve, reject) => {
-  const { training, employee, remove } = call.query
+  const {
+    training,
+    employee,
+    remove,
+    ticket
+  } = call.query
 
   const message = {
     domain: 'training',
@@ -20,7 +25,7 @@ const participate = call => new Promise((resolve, reject) => {
       return reject(message)
     }
 
-    if (!remove && t.participants.indexOf(employee) !== -1) {
+    if (!remove && t.participants.find(p => p.participant.toString() !== employee) !== undefined) {
       message.i18n = 'TRAINING_ALREADY_PARTICIPATING'
       message.data = t
       message.code = 400
@@ -29,7 +34,11 @@ const participate = call => new Promise((resolve, reject) => {
     }
 
     if (!remove && (Number.isInteger(t.spots) && t.spots > t.participants.length)) {
-      t.participants.push(employee)
+      t.participants.push({
+        participant: employee,
+        bookedAt: new Date(),
+        ticket
+      })
 
       return t.save(() => {
         message.i18n = 'TRAINING_PARTICIPATE_SUCCESS'
@@ -41,7 +50,7 @@ const participate = call => new Promise((resolve, reject) => {
     }
 
     if (remove) {
-      t.participants = t.participants.filter(p => p.toString() !== employee)
+      t.participants = t.participants.filter(p => p.participant.toString() !== employee)
 
       return t.save(() => {
         message.i18n = 'TRAINING_UNPARTICIPATE_SUCCESS'
