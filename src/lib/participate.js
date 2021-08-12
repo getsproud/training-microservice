@@ -25,7 +25,7 @@ const participate = call => new Promise((resolve, reject) => {
       return reject(message)
     }
 
-    if (!remove && t.participants.find(p => p.participant.toString() !== employee) !== undefined) {
+    if (!remove && t.participants.find(p => p.participant.toString() === employee) !== undefined) {
       message.i18n = 'TRAINING_ALREADY_PARTICIPATING'
       message.data = t
       message.code = 400
