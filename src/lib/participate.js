@@ -40,7 +40,12 @@ const participate = call => new Promise((resolve, reject) => {
         ticket
       })
 
-      return t.save(() => {
+      return t.save(err => {
+        if (err) {
+          message.error = err
+          return reject(message)
+        }
+
         message.i18n = 'TRAINING_PARTICIPATE_SUCCESS'
         message.data = t
         message.code = 200
@@ -52,7 +57,12 @@ const participate = call => new Promise((resolve, reject) => {
     if (remove) {
       t.participants = t.participants.filter(p => p.participant.toString() !== employee)
 
-      return t.save(() => {
+      return t.save(err => {
+        if (err) {
+          message.error = err
+          return reject(message)
+        }
+        
         message.i18n = 'TRAINING_UNPARTICIPATE_SUCCESS'
         message.data = t
         message.code = 200
