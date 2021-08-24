@@ -48,7 +48,11 @@ const schema = new Schema({
       type: Schema.Types.Date,
       default: new Date()
     },
-    ticket: Schema.Types.String
+    ticket: {
+      title: Schema.Types.String,
+      currency: Schema.Types.String,
+      price: Schema.Types.Number
+    }
   }],
   categories: [{
     type: Schema.Types.ObjectId,
