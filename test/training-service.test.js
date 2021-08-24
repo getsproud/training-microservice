@@ -87,7 +87,7 @@ describe('findAllBy', () => {
     expect(trainings.code).toBe(200)
     expect(trainings.error).toBeFalsy()
     expect(trainings.stack).toBeFalsy()
-    expect(trainings.data.docs.length).toBe(3)
+    expect(trainings.data.docs.length).toBe(4)
   })
 })
 
